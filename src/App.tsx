@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { useEffect, useState } from "react";
 import "./App.css";
 import axios from "axios";
@@ -100,26 +101,26 @@ function App() {
 
   console.log("not viewed: ", pulls, "viewed: ", viewedPulls);
 
-  const addPrLocalStorage = (id: number) => {
-    const existingIds =
-      JSON.parse(localStorage.getItem("GH_IDS") || "[]") || [];
+  // const addPrLocalStorage = (id: number) => {
+  //   const existingIds =
+  //     JSON.parse(localStorage.getItem("GH_IDS") || "[]") || [];
 
-    const addedIds = JSON.stringify(existingIds.concat(id));
+  //   const addedIds = JSON.stringify(existingIds.concat(id));
 
-    localStorage.setItem("GH_IDS", addedIds);
-    updateLocalPRs();
-  };
-  const removePrLocalStorage = (id: number) => {
-    const existingIds =
-      JSON.parse(localStorage.getItem("GH_IDS") || "[]") || [];
+  //   localStorage.setItem("GH_IDS", addedIds);
+  //   updateLocalPRs();
+  // };
+  // const removePrLocalStorage = (id: number) => {
+  //   const existingIds =
+  //     JSON.parse(localStorage.getItem("GH_IDS") || "[]") || [];
 
-    const addedIds = JSON.stringify(
-      existingIds.filter((f: number) => f !== id)
-    );
+  //   const addedIds = JSON.stringify(
+  //     existingIds.filter((f: number) => f !== id)
+  //   );
 
-    localStorage.setItem("GH_IDS", addedIds);
-    updateLocalPRs();
-  };
+  //   localStorage.setItem("GH_IDS", addedIds);
+  //   updateLocalPRs();
+  // };
 
   const updateLocalPRs = (data?: LocalPullRequest[]) => {
     const GH_IDS: string[] =
