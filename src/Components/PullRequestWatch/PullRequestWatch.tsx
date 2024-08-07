@@ -26,10 +26,7 @@ const PullRequestWatch = () => {
   const [viewedPulls, setViewedPulls] = useState<LocalPullRequest[] | []>([]);
 
   useEffect(() => {
-    const Authorization = `Bearer ${
-      localStorage.getItem("ghToken") ||
-      "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"
-    }`;
+    const Authorization = `Bearer ${localStorage.getItem("ghToken")}`;
 
     setCountdown(initialCountdown);
 
