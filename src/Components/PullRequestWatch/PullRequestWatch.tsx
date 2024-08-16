@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import { LocalPullRequest, PullRequest } from './types';
 import { Anchor, Card, List, ListItem, Text } from '@mantine/core';
 import { useConfig } from '@/Store/Global';
@@ -27,7 +27,7 @@ const PullRequestWatch = () => {
   const initialCountdown = minutes * 60;
 
   const [countdown, setCountdown] = useState(initialCountdown);
-  const [pulls, setPulls] = useState<LocalPullRequest[] | []>([]);
+  const [pulls, setPulls] = useState<LocalPullRequest[]>([]);
   const [viewedPulls, setViewedPulls] = useState<LocalPullRequest[] | []>([]);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ const PullRequestWatch = () => {
       Promise.all(allRepoRequests()).then((responseMatrix) => {
         const responseArray: PullRequest[] = responseMatrix.flat();
 
-        const PRdata: LocalPullRequest[] = responseArray
+        const PRdata = responseArray
           .map((pr: PullRequest) => {
             const isAuthor = !!(pr.user.login.toLowerCase() === ghUser);
 
@@ -68,8 +68,9 @@ const PullRequestWatch = () => {
               };
             }
           })
-          .filter((f): f is LocalPullRequest => typeof f === 'object');
-        setPulls(PRdata);
+          .filter((f) => typeof f === 'object');
+
+        setPulls(PRdata as unknown as LocalPullRequest[]);
       });
 
     getAllRepos();
