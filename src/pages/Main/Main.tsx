@@ -1,6 +1,6 @@
 import { Flex } from '@mantine/core';
-import PullRequestWatch from '../../components/PullRequestWatch';
-import TrackedRepos from '../../components/WatchedRepos';
+import PullRequestWatch from '@/Components/PullRequestWatch';
+import TrackedRepos from '@/Components/WatchedRepos';
 
 const Main = () => {
   return (

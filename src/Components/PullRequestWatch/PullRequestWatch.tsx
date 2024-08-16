@@ -1,5 +1,5 @@
 import { SetStateAction, useEffect, useState } from 'react';
-import { LocalPullRequest, PullRequest } from './types';
+import { LocalPullRequest, PullRequest } from '@/Components/PullRequestWatch/types';
 import { Anchor, Card, List, ListItem, Text } from '@mantine/core';
 import { useConfig } from '@/Store/Global';
 import { fetchPullRequests } from '@/services';
