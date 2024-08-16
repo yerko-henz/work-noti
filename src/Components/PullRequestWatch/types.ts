@@ -63,4 +63,5 @@ export interface LocalPullRequest extends PullRequest {
   isAuthor: boolean;
   isReviewer: boolean;
   link: string;
+  repo: string;
 }
