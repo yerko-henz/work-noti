@@ -1,23 +1,28 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
-import { LocalPullRequest, PullRequest } from "./types";
-import { Card, List, ListItem } from "@mantine/core";
+import { useEffect, useState } from 'react';
+import { LocalPullRequest, PullRequest } from './types';
+import { Anchor, Card, List, ListItem, Text } from '@mantine/core';
+import { useConfig } from '@/Store/Global';
+import { fetchPullRequests } from '@/services';
+import { useQueryClient } from '@tanstack/react-query';
 
-const user = "YerkoHR";
-const watchedRepos = [
-  "agendapro-frontend",
-  "emerald",
-  "business-frontend-monorepo",
-  "business-common-frontend",
-  "emerald-icons",
-  "agendapro-ecommerce-frontend",
-  "business-administration-frontend",
-  "sapphire",
-  "e2e-microfronts",
-];
+// const watchedRepos = [
+//   'agendapro-frontend',
+//   'emerald',
+//   'business-frontend-monorepo',
+//   'business-common-frontend',
+//   'emerald-icons',
+//   'agendapro-ecommerce-frontend',
+//   'business-administration-frontend',
+//   'sapphire',
+//   'e2e-microfronts'
+// ];
 
 const PullRequestWatch = () => {
-  const minutes = 15;
+  const queryClient = useQueryClient();
+  const config = useConfig();
+  const { ghUser, organization, ghToken, watchedRepos, refreshPullRequestInterval } = config;
+
+  const minutes = refreshPullRequestInterval;
   const intervalDuration = minutes * 60 * 1000;
   const initialCountdown = minutes * 60;
 
@@ -26,36 +31,25 @@ const PullRequestWatch = () => {
   const [viewedPulls, setViewedPulls] = useState<LocalPullRequest[] | []>([]);
 
   useEffect(() => {
-    const Authorization = localStorage.getItem("ghToken");
-
     setCountdown(initialCountdown);
 
-    const requests = () =>
-      watchedRepos.map(async (repo) => {
-        return axios
-          .get(`https://api.github.com/repos/agendapro/${repo}/pulls`, {
-            headers: {
-              Accept: "application/vnd.github+json",
-              Authorization,
-            },
-            params: {
-              state: "open",
-            },
-          })
-          .then(({ data }) => data);
-      });
+    const allRepoRequests = () =>
+      watchedRepos.map(async (repo) =>
+        queryClient.fetchQuery({
+          queryKey: ['pull_requests', { ghToken, organization, repo: repo.name }],
+          queryFn: () => fetchPullRequests({ ghToken, organization, repo: repo.name })
+        })
+      );
 
     const getAllRepos = () =>
-      Promise.all(requests()).then((responseMatrix) => {
+      Promise.all(allRepoRequests()).then((responseMatrix) => {
         const responseArray: PullRequest[] = responseMatrix.flat();
 
         const PRdata: LocalPullRequest[] = responseArray
           .map((pr: PullRequest) => {
-            const isAuthor = !!(pr.user.login === user);
+            const isAuthor = !!(pr.user.login.toLowerCase() === ghUser);
 
-            const isReviewer = !!pr.requested_reviewers.find(
-              (reviewer) => reviewer.login === user
-            );
+            const isReviewer = !!pr.requested_reviewers.find((reviewer) => reviewer.login.toLowerCase() === ghUser);
 
             if (isAuthor || isReviewer) {
               return {
@@ -68,15 +62,14 @@ const PullRequestWatch = () => {
                 title: pr.title,
                 updated_at: pr.updated_at,
                 repo: pr.base.repo.name,
-                link: `https://github.com/agendapro/${pr.base.repo.name}/pull/${pr.number}`,
+                link: `https://github.com/${organization}/${pr.base.repo.name}/pull/${pr.number}`,
                 isAuthor,
-                isReviewer,
+                isReviewer
               };
             }
           })
-          .filter((f): f is LocalPullRequest => typeof f === "object");
-
-        updateLocalPRs(PRdata);
+          .filter((f): f is LocalPullRequest => typeof f === 'object');
+        setPulls(PRdata);
       });
 
     getAllRepos();
@@ -86,7 +79,7 @@ const PullRequestWatch = () => {
         await getAllRepos();
         setCountdown(initialCountdown);
       } catch (error) {
-        console.error("Error making request:", error);
+        console.error('Error making request:', error);
       }
     }, intervalDuration);
 
@@ -98,9 +91,7 @@ const PullRequestWatch = () => {
       clearInterval(intervalId);
       clearInterval(countdownIntervalId);
     };
-  }, []);
-
-  console.log("not viewed: ", pulls, "viewed: ", viewedPulls);
+  }, [watchedRepos]);
 
   // const addPrLocalStorage = (id: number) => {
   //   const existingIds =
@@ -124,15 +115,10 @@ const PullRequestWatch = () => {
   // };
 
   const updateLocalPRs = (data?: LocalPullRequest[]) => {
-    const GH_IDS: string[] =
-      JSON.parse(localStorage.getItem("GH_IDS") || "[]") || [];
+    const GH_IDS: string[] = JSON.parse(localStorage.getItem('GH_IDS') || '[]') || [];
 
-    const viewedPR = (data || viewedPulls).filter((f: LocalPullRequest) =>
-      GH_IDS.some((s: string) => s === `${f.id}`)
-    );
-    const notViewedPR = (data || pulls).filter(
-      (f: LocalPullRequest) => !GH_IDS.some((s: string) => s === `${f.id}`)
-    );
+    const viewedPR = (data || viewedPulls).filter((f: LocalPullRequest) => GH_IDS.some((s: string) => s === `${f.id}`));
+    const notViewedPR = (data || pulls).filter((f: LocalPullRequest) => !GH_IDS.some((s: string) => s === `${f.id}`));
 
     setPulls(notViewedPR);
     setViewedPulls(viewedPR);
@@ -145,16 +131,18 @@ const PullRequestWatch = () => {
   };
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder mx="auto" maw={600}>
-      <p>Next refresh: {formatTime(countdown)}</p>
+    <Card shadow="sm" padding="lg" radius="md" withBorder mx="auto" w="60%">
+      <Text style={{ marginBottom: '12px' }} size="md">
+        Next refresh: {formatTime(countdown)}
+      </Text>
 
       <List>
         {pulls.map((pull) => (
           <ListItem key={pull.number}>
-            {pull?.repo} -
-            <a href={pull.link} target="_blank">
+            {pull?.repo} -{' '}
+            <Anchor href={pull.link} target="_blank">
               {pull?.title}
-            </a>
+            </Anchor>
           </ListItem>
         ))}
       </List>
