@@ -2,7 +2,15 @@ import { useEffect, useState } from 'react';
 import { useFetchRepos } from '@/services/Services';
 import { useConfig, useGlobalStateActions } from '@/Store/Global';
 import { Anchor, Badge, Button, Center, Tooltip, Combobox, Flex, InputBase, rem, useCombobox } from '@mantine/core';
-import { IconGitBranch, IconReload, IconWorldShare } from '@tabler/icons-react';
+import {
+  IconBiohazard,
+  IconFlask2,
+  IconGitBranch,
+  IconPlug,
+  IconReload,
+  IconTestPipe2,
+  IconWorldShare
+} from '@tabler/icons-react';
 
 const WatchedRepos = () => {
   const combobox = useCombobox({
@@ -102,6 +110,28 @@ const WatchedRepos = () => {
               <IconReload size={18} />
             </Tooltip>
           </Button>
+          <Button
+            px={10}
+            size="sm"
+            variant="light"
+            color="gray"
+            onClick={() => window.open('https://app.agendaprodev.com/bookings')}
+          >
+            <Tooltip label="go to staging">
+              <IconFlask2 size={18} />
+            </Tooltip>
+          </Button>
+          <Button
+            px={10}
+            size="sm"
+            variant="light"
+            color="gray"
+            onClick={() => window.open('https://app.agendapro.com/bookings')}
+          >
+            <Tooltip label="go to prod">
+              <IconPlug size={18} />
+            </Tooltip>
+          </Button>
         </Flex>
         <Flex gap={3} wrap="wrap" align="center" justify="center">
           {watchedRepos.length > 0 &&
@@ -124,7 +154,7 @@ const WatchedRepos = () => {
                   <Tooltip label="Go to deploy">
                     <Anchor
                       style={{ display: 'flex' }}
-                      href={repo.html_url}
+                      href={`${repo.html_url}/actions`}
                       target="_blank"
                       underline="never"
                       key={`${repo.name}-${repo.id}`}

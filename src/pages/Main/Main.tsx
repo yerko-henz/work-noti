@@ -4,7 +4,7 @@ import TrackedRepos from '@/Components/WatchedRepos';
 
 const Main = () => {
   return (
-    <Flex gap={10} direction="column">
+    <Flex gap={10} direction="column" style={{ maxWidth: '60%', margin: '0 auto' }}>
       <TrackedRepos />
       <PullRequestWatch />
     </Flex>

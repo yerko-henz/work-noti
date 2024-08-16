@@ -132,9 +132,9 @@ const PullRequestWatch = () => {
   };
 
   return (
-    <Card shadow="sm" padding="lg" radius="md" withBorder mx="auto" w="60%">
-      <Text style={{ marginBottom: '12px' }} size="md">
-        Next refresh: {formatTime(countdown)}
+    <Card shadow="sm" padding="lg" radius="md" withBorder>
+      <Text style={pulls?.length !== 0 ? { marginBottom: '12px' } : {}} size="md">
+        {pulls?.length !== 0 ? `Next refresh: ${formatTime(countdown)}` : 'No results...'}
       </Text>
 
       <List>
